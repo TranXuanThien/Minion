@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ViewController" customModule="ExerciseEditing" customModuleProvider="target"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="ZCM-yY-aoJ">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <items>
+                <barButtonItem image="ic_format_size" id="Mgs-dt-cMk">
+                    <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <action selector="setFontSizeParagraph:" destination="-1" id="KB7-nL-l1m"/>
+                    </connections>
+                </barButtonItem>
+                <barButtonItem style="plain" systemItem="flexibleSpace" id="9lE-Ng-hcd"/>
+                <barButtonItem image="ic_format_align_left" id="ERF-qL-hqi">
+                    <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <action selector="setAlignmentParagraph:" destination="-1" id="wv5-Fy-dlt"/>
+                    </connections>
+                </barButtonItem>
+                <barButtonItem style="plain" systemItem="flexibleSpace" id="DEP-wR-3bE"/>
+                <barButtonItem image="ic_fiber_manual_record" id="a4f-Nu-0kv">
+                    <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <action selector="setFontColorParagraph:" destination="-1" id="GXA-Bh-igq"/>
+                    </connections>
+                </barButtonItem>
+            </items>
+            <point key="canvasLocation" x="268" y="160"/>
+        </toolbar>
+    </objects>
+    <resources>
+        <image name="ic_fiber_manual_record" width="24" height="24"/>
+        <image name="ic_format_align_left" width="24" height="24"/>
+        <image name="ic_format_size" width="24" height="24"/>
+    </resources>
+</document>
