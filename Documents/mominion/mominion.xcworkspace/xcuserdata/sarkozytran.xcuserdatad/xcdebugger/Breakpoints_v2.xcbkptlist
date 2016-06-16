@@ -10,13 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "mominion/FoodVC.swift"
-            timestampString = "487698324.367063"
+            timestampString = "487788699.048179"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "178"
-            endingLineNumber = "178"
-            landmarkName = "didInputProcessingField(_:)"
-            landmarkType = "5">
+            startingLineNumber = "255"
+            endingLineNumber = "255">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

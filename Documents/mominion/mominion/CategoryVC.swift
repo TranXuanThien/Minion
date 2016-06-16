@@ -1,31 +1,29 @@
 //
-//  RestaurantVC.swift
+//  CategoryVC.swift
 //  mominion
 //
-//  Created by SarkozyTran on 6/13/16.
+//  Created by SarkozyTran on 6/16/16.
 //  Copyright © 2016 SarkozyTran. All rights reserved.
 //
 
 import UIKit
 
-class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
-
+class CategoryVC: PFQueryTableViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        searchBar.delegate = self
-        self.title = "Restaurants"
+        self.title = "Categorys"
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     override init(style: UITableViewStyle, className: String?) {
         super.init(style: style, className: className)
-        parseClassName = "Restaurant"
+        parseClassName = "Cate"
         pullToRefreshEnabled = true
         paginationEnabled = true
         objectsPerPage = 25
@@ -33,7 +31,7 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        parseClassName = "Restaurant"
+        parseClassName = "Cate"
         pullToRefreshEnabled = true
         paginationEnabled = true
         objectsPerPage = 25
@@ -41,10 +39,6 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
     
     override func queryForTable() -> PFQuery {
         let query = PFQuery(className: self.parseClassName!)
-        
-        if searchBar.text?.characters.count > 0 {
-            query.whereKey("name", containsString: searchBar.text!)
-        }
         
         if self.objects!.count == 0 {
             query.cachePolicy = .CacheThenNetwork
@@ -55,25 +49,6 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
         return query
     }
     
-    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
-        self.loadObjects()
-    }
-    
-    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
-        searchBar.showsCancelButton = true
-    }
-    
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
-        self.loadObjects()
-    }
-    
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
-        searchBar.text = nil
-        self.loadObjects()
-        searchBar.showsCancelButton = false
-        searchBar.resignFirstResponder()
-    }
-    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, object: PFObject?) -> PFTableViewCell? {
         let cellIdentifier = "cell"
         
@@ -81,7 +56,7 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
         if cell == nil {
             cell = PFTableViewCell(style: .Default, reuseIdentifier: cellIdentifier)
         }
-
+        
         if let object = object {
             cell!.textLabel?.text = object["name"] as? String
         }
@@ -94,14 +69,5 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.performSegueWithIdentifier("goToFood", sender: nil)
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "goToFood" {
-            let object = objects![self.tableView.indexPathForSelectedRow!.row]
-            let foodVC = segue.destinationViewController as? FoodVC
-            foodVC?.restaurantID = object.objectId
-        }
     }
 }

@@ -1,39 +1,32 @@
 //
-//  RestaurantVC.swift
+//  FoodVC.swift
 //  mominion
 //
-//  Created by SarkozyTran on 6/13/16.
+//  Created by SarkozyTran on 6/16/16.
 //  Copyright © 2016 SarkozyTran. All rights reserved.
 //
 
 import UIKit
 
-class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
-
+class FoodVC: PFQueryTableViewController {
+    
+    var restaurantID:String?
+    
     @IBOutlet weak var searchBar: UISearchBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        searchBar.delegate = self
-        self.title = "Restaurants"
+        self.title = "Foods"
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    override init(style: UITableViewStyle, className: String?) {
-        super.init(style: style, className: className)
-        parseClassName = "Restaurant"
-        pullToRefreshEnabled = true
-        paginationEnabled = true
-        objectsPerPage = 25
-    }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        parseClassName = "Restaurant"
+        parseClassName = "Food"
         pullToRefreshEnabled = true
         paginationEnabled = true
         objectsPerPage = 25
@@ -41,6 +34,7 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
     
     override func queryForTable() -> PFQuery {
         let query = PFQuery(className: self.parseClassName!)
+        query.whereKey("restaurant", equalTo: restaurantID!)
         
         if searchBar.text?.characters.count > 0 {
             query.whereKey("name", containsString: searchBar.text!)
@@ -53,6 +47,25 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
         query.orderByDescending("createdAt")
         
         return query
+    }
+    
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, object: PFObject?) -> PFTableViewCell? {
+        let cellIdentifier = "cell"
+        
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as? PFTableViewCell
+        if cell == nil {
+            cell = PFTableViewCell(style: .Default, reuseIdentifier: cellIdentifier)
+        }
+        
+        if let object = object {
+            cell!.textLabel?.text = object["name"] as? String
+        }
+        
+        return cell
+    }
+    
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return 60;
     }
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
@@ -73,35 +86,5 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
         searchBar.showsCancelButton = false
         searchBar.resignFirstResponder()
     }
-    
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, object: PFObject?) -> PFTableViewCell? {
-        let cellIdentifier = "cell"
-        
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as? PFTableViewCell
-        if cell == nil {
-            cell = PFTableViewCell(style: .Default, reuseIdentifier: cellIdentifier)
-        }
 
-        if let object = object {
-            cell!.textLabel?.text = object["name"] as? String
-        }
-        
-        return cell
-    }
-    
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 60;
-    }
-    
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.performSegueWithIdentifier("goToFood", sender: nil)
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "goToFood" {
-            let object = objects![self.tableView.indexPathForSelectedRow!.row]
-            let foodVC = segue.destinationViewController as? FoodVC
-            foodVC?.restaurantID = object.objectId
-        }
-    }
 }

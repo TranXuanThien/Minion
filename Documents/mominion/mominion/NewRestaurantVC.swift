@@ -73,6 +73,29 @@ class NewRestaurantVC: UIViewController, UIImagePickerControllerDelegate, UINavi
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
+    @IBAction func saveRestaurantInfo(sender: AnyObject) {
+        if self.restaurant.name == nil || self.restaurant.address == nil || self.restaurant.openTime == nil || self.restaurant.priceRange == nil || self.restaurant.priceRange == nil || self.restaurant.wifi == nil {
+            let alert = UIAlertView.init(title: "Error", message: "You must input all information", delegate: self, cancelButtonTitle: "OK")
+            alert.show()
+        } else {
+//            let res = PFObject(className: "Restaurant")
+//            res.setObject(self.restaurant.name!, forKey: "name")
+//            res.setObject(self.restaurant.openTime!, forKey: "openingTime")
+//            res.setObject(self.restaurant.address!, forKey: "address")
+//            res.setObject(self.restaurant.wifi!, forKey: "wifiYes")
+//            res.setObject(self.restaurant.priceRange!, forKey: "priceRange")
+//            res.setObject(self.restaurant.specifi!, forKey: "specific")
+//            res.setObject(self.restaurant.photo!, forKey: "photos")
+//            res.saveInBackgroundWithBlock { (succeeded, error) -> Void in
+//                if succeeded {
+//                    print("Object Uploaded")
+//                } else {
+//                    print("Error: \(error) \(error!.userInfo)")
+//                }
+//            }
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -82,7 +105,7 @@ class NewRestaurantVC: UIViewController, UIImagePickerControllerDelegate, UINavi
 extension NewRestaurantVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 6
+        return 7
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -100,6 +123,8 @@ extension NewRestaurantVC: UITableViewDataSource, UITableViewDelegate {
             return createAndConfigureCellSpecifi()
         case 5:
             return createAndConfigureCellPriceRange()
+        case 6:
+            return createAndConfigureCellWifi()
         default:
             return UITableViewCell()
         }
@@ -165,6 +190,18 @@ extension NewRestaurantVC: UITableViewDataSource, UITableViewDelegate {
         return cellTitle
     }
     
+    func createAndConfigureCellWifi() -> CellWifi {
+        let cellTitle = self.resInformationtbv?.dequeueReusableCellWithIdentifier("CellWifi") as! CellWifi
+        
+        if self.restaurant.wifi == true {
+            cellTitle.btnYes.tintColor = UIColor.redColor()
+        } else {
+            cellTitle.btnYes.tintColor = UIColor.redColor()
+        }
+        
+        return cellTitle
+    }
+    
     func createAndConfigureCellPhoto() -> CellRestaurantPhoto {
         let cellPhoto = self.resInformationtbv?.dequeueReusableCellWithIdentifier("CellRestaurantPhoto") as! CellRestaurantPhoto
         if let photo = self.restaurant.photo {
@@ -206,6 +243,9 @@ extension NewRestaurantVC: UITableViewDataSource, UITableViewDelegate {
     
     func triggerEvent() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewRestaurantVC.didInputProcessingField(_:)), name: EK_TextInputVC_did_input, object: nil)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewRestaurantVC.didInputWifi(_:)), name: "inputWifi", object: nil)
+
 //        NSNotificationCenter.defaultCenter().addObserver(
 //            self,
 //            selector: "didSelectedPhotos:",
@@ -233,5 +273,11 @@ extension NewRestaurantVC: UITableViewDataSource, UITableViewDelegate {
         self.resInformationtbv.reloadData()
         self.inputingField = -1
     }
+    
+    func didInputWifi(notification: NSNotification) {
+        let isHaveWifi = notification.object as? Bool
+        self.restaurant.wifi = isHaveWifi
+    }
+    
 }
 
