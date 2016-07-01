@@ -9,6 +9,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Cloudinary.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Parse.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -32,12 +37,17 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6095DE398C2BCE7C24317310CA12FDDD</key>
+		<key>2712BCCCF368A3C0EB9FAA6F981D62B8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>7A15D17F08B8C3133151C4B473ECA25C</key>
+		<key>369B2BCC31DAE9E8DB0F82A02F1061FE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6095DE398C2BCE7C24317310CA12FDDD</key>
 		<dict>
 			<key>primary</key>
 			<true/>

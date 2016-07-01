@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'DC55978D7E24B66A1C0A6742'
+               BlueprintIdentifier = 'D06129FE6F537262E8F1A6DE'
                BlueprintName = 'Pods-mominion'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'libPods-mominion.a'>

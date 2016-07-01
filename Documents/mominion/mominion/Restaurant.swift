@@ -16,8 +16,9 @@ class Restaurant: NSObject {
     var specifi:String?
     var priceRange:String?
     var wifi:Bool?
-    var photo: UIImage?
-    
+    var photo: [UIImage]?
+    var photoURL: [String]?
+
     override init() {
         
     }

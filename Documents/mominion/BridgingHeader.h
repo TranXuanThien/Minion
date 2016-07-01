@@ -9,6 +9,7 @@
 #import <Parse/Parse.h>
 #import <Bolts/Bolts.h>
 #import <ParseUI/ParseUI.h>
+#import <Cloudinary/Cloudinary.h>
 #ifndef BridgingHeader_h
 #define BridgingHeader_h
 

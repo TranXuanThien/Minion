@@ -21,11 +21,15 @@ class CellWifi: UITableViewCell {
 
     @IBAction func notWifi(sender: AnyObject) {
         isHaveWifi = false
+        btnNo.setImage(UIImage(named: "ic_checked_box"), forState: .Normal)
+        btnYes.setImage(UIImage(named: "ic_check_box"), forState: .Normal)
         NSNotificationCenter.defaultCenter().postNotificationName("inputWifi", object: isHaveWifi)
     }
     
     @IBAction func haveWifi(sender: AnyObject) {
         isHaveWifi = true
+        btnYes.setImage(UIImage(named: "ic_checked_box"), forState: .Normal)
+        btnNo.setImage(UIImage(named: "ic_check_box"), forState: .Normal)
         NSNotificationCenter.defaultCenter().postNotificationName("inputWifi", object: isHaveWifi)
     }
     

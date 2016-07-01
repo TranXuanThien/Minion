@@ -8,11 +8,15 @@
 
 import UIKit
 
-class NewFoodVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+let clouder = CLCloudinary(url: "cloudinary://869393512314214:7Py8LZXCU3onzqEvq90KY5Nm2yY@drbathp1m")
+
+class NewFoodVC: BaseVC, CLUploaderDelegate {
     @IBOutlet weak var tbvNewFood: UITableView!
     var food = Food()
-    let imagePicker = UIImagePickerController()
     var inputingField: Int = -1
+    var photo:UIImage?
+    var activityIndicator:UIView?
+    var isLoading = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,8 +26,8 @@ class NewFoodVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         self.tbvNewFood!.rowHeight = UITableViewAutomaticDimension
         self.tbvNewFood!.estimatedRowHeight = 296.0
         
-        self.imagePicker.delegate = self
         triggerEvent()
+        self.food.photoURL = [String]()
     }
     
     func triggerEvent() {
@@ -31,14 +35,21 @@ class NewFoodVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewFoodVC.didInputWifi(_:)), name: "inputWifi", object: nil)
         
-        //        NSNotificationCenter.defaultCenter().addObserver(
-        //            self,
-        //            selector: "didSelectedPhotos:",
-        //            name: EK_PhotoSelectionVC_selected_photo,
-        //            object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewFoodVC.setKindOfMeal(_:)), name: "inputKindOfMeal", object: nil)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewFoodVC.didChooseCategory(_:)), name: "chooseCategory", object: nil)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewFoodVC.didChooseMealTime(_:)), name: "chooseMealTime", object: nil)
+
+        
+        NSNotificationCenter.defaultCenter().addObserver(
+            self,
+            selector: "didSelectedPhotos:",
+            name: EK_PhotoSelectionVC_selected_photo,
+            object: nil)
     }
 
-    func showActionSheet(sender: AnyObject) {
+    override func showActionSheet(sender: AnyObject) {
         let optionMenu = UIAlertController(title: nil, message: Message_SubmitProductDS_ActionSheet_Title, preferredStyle: .ActionSheet)
         
         let deleteAction = UIAlertAction(title: Message_SubmitProductDS_ActionSheet_CameraRoll, style: .Default, handler: {
@@ -68,16 +79,68 @@ class NewFoodVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         self.presentViewController(optionMenu, animated: true, completion: nil)
     }
     
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+    override func imagePickerControllerDidCancel(picker: UIImagePickerController) {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
-        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage{
-            self.food.photo = image
-            self.tbvNewFood.reloadData()
-        }
+    override func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        
         self.dismissViewControllerAnimated(true, completion: nil)
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            NSOperationQueue.mainQueue().addOperationWithBlock { () -> Void in
+                self.performSegueWithIdentifier("goToPhotoSelectionVC", sender: image.resizeImage(800))
+            }
+        }
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == SegK_PhotoSelection) {
+            let photoSelectionVC = segue.destinationViewController as? PhotoSelectionVC
+            if let image = sender as? UIImage {
+                photoSelectionVC?.addPhoto(image)
+            } else if let images = sender as? [UIImage] {
+                for image in images {
+                    photoSelectionVC?.addPhoto(image)
+                }
+            }
+        }
+    }
+    
+    func didSelectedPhotos(notification: NSNotification) {
+        if let photos = notification.userInfo![K_Selected_Photos] as? [UIImage] {
+            self.food.photo = photos
+            self.tbvNewFood?.reloadData()
+        }
+    }
+    
+    func uploaderSuccess(result: [NSObject : AnyObject]!, context: AnyObject!) {
+        let urlImage = result["url"] as! String
+        self.food.photoURL?.append(urlImage)
+        if self.food.photoURL?.count == self.food.photo?.count {
+            let food = PFObject(className: "Food")
+            food.setObject(self.food.name!, forKey: "name")
+            food.setObject(self.food.isDrink!, forKey: "isDrink")
+            food.setObject(self.food.subName!, forKey: "subName")
+            food.setObject(self.food.price!, forKey: "price")
+            food.setObject(self.food.cateID!, forKey: "CateID")
+            food.setObject(self.food.kindOfMeal!, forKey: "kindOfMeal")
+            food.setObject(self.food.mealTime!, forKey: "mealTime")
+            food.setObject(self.food.specific!, forKey: "specific")
+            food.setObject(self.food.descriptionFood!, forKey: "description")
+            food.setObject(self.food.photoURL!, forKey: "photos")
+            food.setObject(self.food.restaurant!, forKey: "restaurant")
+            
+            food.saveInBackgroundWithBlock { (succeeded, error) -> Void in
+                if succeeded {
+                    print("Object Uploaded")
+                    self.navigationController?.popViewControllerAnimated(true)
+                } else {
+                    print("Error: \(error) \(error!.userInfo)")
+                }
+                self.activityIndicator?.removeFromSuperview()
+                self.isLoading = false
+            }
+        }
     }
 }
 
@@ -141,8 +204,8 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
     func createAndConfigureCellPrice() -> CellOneLabel {
         let cellTitle = self.tbvNewFood?.dequeueReusableCellWithIdentifier("CellOneLabel") as! CellOneLabel
         
-        if self.food.price?.characters.count > 0 {
-            cellTitle.cellOneLabel.text = self.food.price
+        if let price = self.food.price {
+            cellTitle.cellOneLabel.text = "\(price)"
         } else {
             cellTitle.cellOneLabel.text = "Price"
         }
@@ -162,19 +225,20 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
         return cellTitle
     }
     
-    func createAndConfigureCellKindOfMeal() -> CellOneLabel {
-        let cellTitle = self.tbvNewFood?.dequeueReusableCellWithIdentifier("CellOneLabel") as! CellOneLabel
+    func createAndConfigureCellKindOfMeal() -> CellKindOfMeal {
+        let cellTitle = self.tbvNewFood?.dequeueReusableCellWithIdentifier("CellKindOfMeal") as! CellKindOfMeal
         
         if self.food.kindOfMeal?.characters.count > 0 {
-            cellTitle.cellOneLabel.text = self.food.kindOfMeal
+            cellTitle.btnMain.tintColor = UIColor.redColor()
         } else {
-            cellTitle.cellOneLabel.text = "Kind of meal"
+            cellTitle.btnMain.tintColor = UIColor.redColor()
         }
         
         return cellTitle
     }
     
     func createAndConfigureCellMealTime() -> CellOneLabel {
+        
         let cellTitle = self.tbvNewFood?.dequeueReusableCellWithIdentifier("CellOneLabel") as! CellOneLabel
         
         if self.food.mealTime?.characters.count > 0 {
@@ -226,14 +290,15 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
     func createAndConfigureCellPhoto() -> CellRestaurantPhoto {
         let cellPhoto = self.tbvNewFood?.dequeueReusableCellWithIdentifier("CellRestaurantPhoto") as! CellRestaurantPhoto
         if let photo = self.food.photo {
-            cellPhoto.photo.image = photo.resizeImage(500)
+            cellPhoto.setPhotos(photo)
         }
-        
+            
         return cellPhoto
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         startEditField(at: indexPath.row)
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     func startEditField(at index:Int) {
@@ -248,17 +313,23 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
         case 3:
             NSUserDefaults.standardUserDefaults().setObject(self.food.price, forKey: K_Inputed_Text)
         case 4:
-            let cateVC = CategoryVC()
+            let storyboard = UIStoryboard(name:"Main", bundle: nil)
+            let cateVC = storyboard.instantiateViewControllerWithIdentifier("CategoryVC") as! PFQueryTableViewController
             self.navigationController?.pushViewController(cateVC, animated: true)
             return
         case 5:
-            NSUserDefaults.standardUserDefaults().setObject(self.food.kindOfMeal, forKey: K_Inputed_Text)
+            return
         case 6:
-            NSUserDefaults.standardUserDefaults().setObject(self.food.mealTime, forKey: K_Inputed_Text)
+            let storyboard = UIStoryboard(name:"Main", bundle: nil)
+            let mealTimeVC = storyboard.instantiateViewControllerWithIdentifier("MealTime")
+            self.navigationController?.pushViewController(mealTimeVC, animated: true)
+            return
         case 7:
             NSUserDefaults.standardUserDefaults().setObject(self.food.specific, forKey: K_Inputed_Text)
         case 8:
             NSUserDefaults.standardUserDefaults().setObject(self.food.descriptionFood, forKey: K_Inputed_Text)
+        case 9:
+            return
         default:
             break
         }
@@ -279,13 +350,13 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
         case 2:
             self.food.subName = notification.userInfo![K_Inputed_Text] as? String
         case 3:
-            self.food.price = notification.userInfo![K_Inputed_Text] as? String
+            self.food.price = (notification.userInfo![K_Inputed_Text] as? String)?.floatValue
         case 4:
-            self.food.cateID = notification.userInfo![K_Inputed_Text] as? String
+            break
         case 5:
-            self.food.kindOfMeal = notification.userInfo![K_Inputed_Text] as? String
+            break
         case 6:
-            self.food.mealTime = notification.userInfo![K_Inputed_Text] as? String
+            break
         case 7:
             self.food.specific = notification.userInfo![K_Inputed_Text] as? String
         case 8:
@@ -297,10 +368,48 @@ extension NewFoodVC: UITableViewDataSource, UITableViewDelegate {
         self.inputingField = -1
     }
     
+    func setKindOfMeal(notification: NSNotification) {
+        let isMain = notification.object as? Bool
+        if isMain == true {
+            self.food.kindOfMeal = "ăn chính"
+        } else {
+            self.food.kindOfMeal = "ăn vặt"
+        }
+        self.tbvNewFood.reloadData()
+    }
+    
     func didInputWifi(notification: NSNotification) {
         let isHaveDrink = notification.object as? Bool
         self.food.isDrink = isHaveDrink
+        self.tbvNewFood.reloadData()
     }
     
+    func didChooseCategory(notification: NSNotification) {
+        let cateID = notification.object as? String
+        self.food.cateID = cateID
+        self.tbvNewFood.reloadData()
+    }
+    
+    func didChooseMealTime(notification: NSNotification) {
+        let mealTime = notification.object as? String
+        self.food.mealTime = mealTime
+        self.tbvNewFood.reloadData()
+    }
+    
+    @IBAction func saveNewFood(sender: AnyObject) {
+        if self.food.name == nil || self.food.subName == nil || self.food.price == nil || self.food.cateID == nil || self.food.kindOfMeal == nil || self.food.mealTime == nil || self.food.specific == nil || self.food.descriptionFood == nil || self.food.isDrink == nil {
+            let alert = UIAlertView.init(title: "Error", message: "You must input all information", delegate: self, cancelButtonTitle: "OK")
+            alert.show()
+        } else {
+            if !isLoading {
+                isLoading = true
+                self.activityIndicator = AlertLoading.showAlertLoading(self.view)
+                for photo in self.food.photo! {
+                    let uploader = CLUploader(clouder, delegate: self)
+                    uploader.upload(UIImagePNGRepresentation(photo), options: nil)
+                }
+            }
+        }
+    }
 }
 

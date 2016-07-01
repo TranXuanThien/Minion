@@ -19,6 +19,10 @@ class FoodVC: PFQueryTableViewController {
         self.title = "Foods"
     }
     
+    override func viewDidAppear(animated: Bool) {
+        self.loadObjects()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -85,6 +89,13 @@ class FoodVC: PFQueryTableViewController {
         self.loadObjects()
         searchBar.showsCancelButton = false
         searchBar.resignFirstResponder()
+    }
+
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "goToNewFood" {
+            let newFoodVC = segue.destinationViewController as? NewFoodVC
+            newFoodVC?.food.restaurant = restaurantID
+        }
     }
 
 }

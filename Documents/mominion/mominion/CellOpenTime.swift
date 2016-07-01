@@ -11,6 +11,11 @@ import UIKit
 class CellOpenTime: UITableViewCell {
 
     @IBOutlet weak var lblOpenTime: UILabel!
+    @IBOutlet weak var fromTime: UILabel!
+    @IBOutlet weak var toTime: UILabel!
+    
+    @IBOutlet weak var btnToTime: UIButton!
+    @IBOutlet weak var btnFromTime: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

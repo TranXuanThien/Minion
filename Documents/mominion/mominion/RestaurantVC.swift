@@ -18,6 +18,10 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
         self.title = "Restaurants"
     }
 
+    override func viewDidAppear(animated: Bool) {
+        self.loadObjects()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -94,12 +98,17 @@ class RestaurantVC: PFQueryTableViewController, UISearchBarDelegate  {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.performSegueWithIdentifier("goToFood", sender: nil)
+        if ((indexPath.row + 1) > objects?.count) {
+            loadNextPage()
+            return;
+        }
+        self.performSegueWithIdentifier("goToFood", sender: indexPath)
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "goToFood" {
-            let object = objects![self.tableView.indexPathForSelectedRow!.row]
+            let indexPath = sender as? NSIndexPath
+            let object = objects![indexPath!.row]
             let foodVC = segue.destinationViewController as? FoodVC
             foodVC?.restaurantID = object.objectId
         }
